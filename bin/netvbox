@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+
+require 'netvbox/vm_manager'
+require 'netvbox/config_manager'
+require 'netvbox/version'
+
+NETVBOX_CONFIG = "#{ENV['HOME']}/.netvbox"
+
+def print_help
+  puts "NetVbox version #{NetVbox::VERSION}"
+  puts "Current config file: #{NETVBOX_CONFIG}"
+  puts 'sub-commands:'
+  puts '    add [ssh host] [username] [password] [vm name] [snapshot name]'
+  puts '        adds a vm to manage'
+  puts '    list'
+  puts '        lists vms under management'
+  puts '    load'
+  puts '        loads vm snapshots'
+  puts '    poweroff'
+  puts '        powers off all vms'
+  puts '    remove [ssh host] [username] [vm name] [snapshot name]'
+  puts '        removes a vm from management'
+  puts '    status'
+  puts '         shows status of vms'
+end
+
+def parse_args
+  command = ARGV[0]
+  config_manager = NetVbox::ConfigManager.new(NETVBOX_CONFIG)
+  vm_manager = NetVbox::VmManager.new(config_manager)
+  case command
+  when 'add'
+    if ARGV.length >= 6
+      hostname, username, password, vm_name, snapshot_name = ARGV[1..5]
+      vm_manager.add_vm(hostname, username, password, vm_name, snapshot_name)
+    else
+      print_help
+    end
+  when 'list'
+    vm_manager.list_vms
+  when 'load'
+    vm_manager.load_snapshots
+  when 'poweroff'
+    vm_manager.poweroff_all
+  when 'remove'
+    if ARGV.length >= 5
+      hostname, username, vm_name, snapshot_name = ARGV[1..4]
+      vm_manager.remove_vm(hostname, username, vm_name, snapshot_name)
+    else
+      print_help
+    end
+  when 'status'
+    vm_manager.print_status
+  else
+    puts "Unknown command: #{command}"
+    print_help
+  end
+end
+
+if ARGV.empty?
+  print_help
+else
+  parse_args
+end
