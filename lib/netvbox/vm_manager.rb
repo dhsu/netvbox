@@ -38,10 +38,12 @@ module NetVbox
     end
 
     def list_vms
-      @config_manager.get_all_vm_info.each do |vm_info|
+      all_vm_info = @config_manager.get_all_vm_info
+      all_vm_info.each do |vm_info|
         ssh_info = vm_info.ssh_connection_info
         puts "#{ssh_info.username}@#{ssh_info.hostname} - vm: #{vm_info.vm_name}, snapshot: #{vm_info.snapshot_name}"
       end
+      puts 'There are no vms' if all_vm_info.empty?
     end
 
     def add_vm(hostname, username, password, vm_name, snapshot_name)
