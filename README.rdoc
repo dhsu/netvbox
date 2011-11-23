@@ -1,0 +1,18 @@
+= netvbox
+
+== Description
+netvbox is a {ruby gem}[https://rubygems.org/gems/netvbox] designed for limited
+administration of VirtualBox VMs on networked machines in a Linux environment.
+
+The original use case was for testing {Chef}[http://www.opscode.com/chef/]
+recipes without needing (or wanting) to provision (and pay for) cloud resources
+(e.g. Amazon EC2). Take a few spare machines, install VirtualBox on each, create
+some snapshots and you're ready to go.
+
+netvbox maintains a list of snapshots for VirtualBox VMs, and can easily load
+all snapshots, power off all VMs, and display VM status information. VMs can
+be added and removed from the list via the add and remove subcommands.
+
+== Sub-commands
+netvbox uses sub-comamnds. Type netvbox with no arguments to see the commands
+
