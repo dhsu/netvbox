@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = 'netvbox'
   s.version     = NetVbox::VERSION
   s.homepage    = 'https://github.com/dhsu/netvbox'
-  s.summary     = 'Remote administration of VirtualBox VMs through ssh'
+  s.summary     = 'Limited remote admin of VirtualBox VMs through ssh'
   s.authors     = ['Dennis Hsu']
   s.email       = ['hsu.dennis@gmail.com']
 
