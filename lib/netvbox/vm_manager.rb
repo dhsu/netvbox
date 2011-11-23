@@ -14,6 +14,7 @@ module NetVbox
         threads << Thread.new(vm) {|vm| puts "#{vm.vm_info.vm_name} on #{vm.vm_info.ssh_connection_info.hostname}... #{vm.status}"}
       end
       threads.each(&:join)
+      puts 'There are no vms' if threads.empty?
     end
 
     def load_snapshots

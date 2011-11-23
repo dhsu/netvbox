@@ -10,11 +10,9 @@ Gem::Specification.new do |s|
   s.summary     = %q{Remote administration of VirtualBox VMs through ssh}
   s.description = %q{Remote administration of VirtualBox VMs through ssh}
 
-  #s.files         = `git ls-files`.split("\n")
-  s.files          = Dir['lib/**/*.rb']
-  #s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  #s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.executables << 'netvbox'
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
   # specify any dependencies here; for example:
