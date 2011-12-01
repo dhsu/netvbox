@@ -1,10 +1,10 @@
 require 'netvbox/vm'
-require 'netvbox/config_manager'
+require 'netvbox/vm_set_config'
 
 module NetVbox
-  class VmManager
-    def initialize(config_manager)
-      @config_manager = config_manager
+  class VmSet
+    def initialize(vm_set_config)
+      @vm_set_config = vm_set_config
     end
 
     def print_status
@@ -38,7 +38,7 @@ module NetVbox
     end
 
     def list_vms
-      all_vm_info = @config_manager.get_all_vm_info
+      all_vm_info = @vm_set_config.get_all_vm_info
       all_vm_info.each do |vm_info|
         ssh_info = vm_info.ssh_connection_info
         puts "#{ssh_info.username}@#{ssh_info.hostname} - vm: #{vm_info.vm_name}, snapshot: #{vm_info.snapshot_name}"
@@ -48,7 +48,7 @@ module NetVbox
 
     def add_vm(hostname, username, password, vm_name, snapshot_name)
       vm_info = VmInfo.new(SshConnectionInfo.new(hostname, username, password), vm_name, snapshot_name)
-      if @config_manager.add_vm(vm_info)
+      if @vm_set_config.add_vm(vm_info)
         puts "Successfully added vm (#{vm_name}, #{snapshot_name})"
       else
         puts "Failed to add vm (#{vm_name}, #{snapshot_name})"
@@ -57,7 +57,7 @@ module NetVbox
 
     def remove_vm(hostname, username, vm_name, snapshot_name)
       vm_info = VmInfo.new(SshConnectionInfo.new(hostname, username, nil), vm_name, snapshot_name)
-      if @config_manager.remove_vm(vm_info)
+      if @vm_set_config.remove_vm(vm_info)
         puts "Successfully removed vm (#{vm_name}, #{snapshot_name})"
       else
         puts "Failed to remove vm (#{vm_name}, #{snapshot_name})"
@@ -67,7 +67,7 @@ module NetVbox
     private
 
     def get_vms
-      @config_manager.get_all_vm_info.collect {|vm_info| Vm.new(vm_info)}
+      @vm_set_config.get_all_vm_info.collect {|vm_info| Vm.new(vm_info)}
     end
   end
 end

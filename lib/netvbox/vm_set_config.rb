@@ -2,7 +2,7 @@ require 'csv'
 require 'netvbox/vm'
 
 module NetVbox
-  class ConfigManager
+  class VmSetConfig
     def initialize(config_file_path)
       @config_file_path = config_file_path
     end

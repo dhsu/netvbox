@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 
-require 'netvbox/vm_manager'
-require 'netvbox/config_manager'
+require 'netvbox/vm_set_config'
+require 'netvbox/vm_set_manager'
 require 'netvbox/version'
 
-NETVBOX_CONFIG = "#{ENV['HOME']}/.netvbox"
+NETVBOX_HOME = "#{ENV['HOME']}/.netvbox"
 
 def print_help
   puts "NetVbox version #{NetVbox::VERSION}"
-  puts "Current config file: #{NETVBOX_CONFIG}"
+  puts "Config path: #{NETVBOX_HOME}"
   puts 'sub-commands:'
   puts '    add [ssh host] [username] [password] [vm name] [snapshot name]'
   puts '        adds a vm to manage'
@@ -22,35 +22,63 @@ def print_help
   puts '        removes a vm from management'
   puts '    status'
   puts '         shows status of vms'
+  puts 'vm set sub-commands:'
+  puts '    createset [vm set]'
+  puts '         creates a vm set with the specified name'
+  puts '    currentset'
+  puts '         shows the current vm set in use'
+  puts '    removeset [vm set]'
+  puts '         removes the vm set with the specified name'
+  puts '    usedefaultset'
+  puts '         uses the default vm set'
+  puts '    useset'
+  puts '         uses the vm set with the specified name'
+end
+
+def expect_args(num_expected_args)
+  if ARGV.length == num_expected_args
+    yield ARGV
+  else
+    puts 'Wrong number of arguments'
+    print_help
+  end
 end
 
 def parse_args
   command = ARGV[0]
-  config_manager = NetVbox::ConfigManager.new(NETVBOX_CONFIG)
-  vm_manager = NetVbox::VmManager.new(config_manager)
+  vm_set_manager = NetVbox::VmSetManager.new(NETVBOX_HOME)
+  vm_set = vm_set_manager.current_set
   case command
   when 'add'
-    if ARGV.length >= 6
+    expect_args(6) do
       hostname, username, password, vm_name, snapshot_name = ARGV[1..5]
-      vm_manager.add_vm(hostname, username, password, vm_name, snapshot_name)
-    else
-      print_help
+      vm_set.add_vm(hostname, username, password, vm_name, snapshot_name)
     end
   when 'list'
-    vm_manager.list_vms
+    vm_set.list_vms
   when 'load'
-    vm_manager.load_snapshots
+    vm_set.load_snapshots
   when 'poweroff'
-    vm_manager.poweroff_all
+    vm_set.poweroff_all
   when 'remove'
-    if ARGV.length >= 5
+    expect_args(5) do
       hostname, username, vm_name, snapshot_name = ARGV[1..4]
-      vm_manager.remove_vm(hostname, username, vm_name, snapshot_name)
-    else
-      print_help
+      vm_set.remove_vm(hostname, username, vm_name, snapshot_name)
     end
   when 'status'
-    vm_manager.print_status
+    vm_set.print_status
+  when 'createset'
+    expect_args(2) {vm_set_manager.create_set ARGV[1]}
+  when 'currentset'
+    puts vm_set_manager.current_set_name
+  when 'listsets'
+    vm_set_manager.vm_set_names.each {|vm_set_name| puts vm_set_name}
+  when 'removeset'
+    expect_args(2) {vm_set_manager.remove_set ARGV[1]}
+  when 'usedefaultset'
+    vm_set_manager.use_default_set
+  when 'useset'
+    expect_args(2) {vm_set_manager.use_set ARGV[1]}
   else
     puts "Unknown command: #{command}"
     print_help
