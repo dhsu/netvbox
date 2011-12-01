@@ -27,6 +27,8 @@ def print_help
   puts '         creates a vm set with the specified name'
   puts '    currentset'
   puts '         shows the current vm set in use'
+  puts '    listsets'
+  puts '         lists all vm sets'
   puts '    removeset [vm set]'
   puts '         removes the vm set with the specified name'
   puts '    usedefaultset'
