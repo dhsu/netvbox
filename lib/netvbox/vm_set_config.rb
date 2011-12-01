@@ -7,25 +7,33 @@ module NetVbox
       @config_file_path = config_file_path
     end
 
-    def get_all_vm_info
+    def all_vm_info
       all_vm_info = []
       if File.readable?(@config_file_path)
-        CSV.foreach(@config_file_path) do |row|
-          all_vm_info << a_to_vm_info(row)
-        end
+        CSV.foreach(@config_file_path) {|row| all_vm_info << a_to_vm_info(row)}
+      else
+        raise "Could not read file: #{@config_file_path}"
       end
       all_vm_info
     end
 
     def add_vm(vm_info)
-      all_vm_info = get_all_vm_info
-      all_vm_info.index(vm_info).nil? ? write_vm_info(all_vm_info << vm_info) : false
+      all = all_vm_info
+      if all.index(vm_info).nil?
+        write_vm_info(all << vm_info)
+      else
+        raise "(#{vm_info.vm_name}, #{vm_info.snapshot_name}) is already under management"
+      end
     end
 
     def remove_vm(vm_info)
-      all_vm_info = get_all_vm_info
-      updated_vm_info = all_vm_info.select {|i| !(i === vm_info)}
-      all_vm_info != updated_vm_info ? write_vm_info(updated_vm_info) : false
+      all = all_vm_info
+      updated = all.select {|i| !(i === vm_info)}
+      if all != updated      
+        write_vm_info(updated)
+      else
+        raise "(#{vm_info.vm_name}, #{vm_info.snapshot_name}) is not under management"
+      end
     end
 
     private
@@ -49,10 +57,8 @@ module NetVbox
         CSV.open(@config_file_path, "w") do |csv|
           all_vm_info.each {|vm_info| csv << vm_info_to_a(vm_info)}
         end
-        true
       rescue IOError
-        puts "ERROR: Could not write vm info to #{@config_file_path}"
-        return false
+        raise "Could not write vm info to #{@config_file_path}"
       end
     end
   end

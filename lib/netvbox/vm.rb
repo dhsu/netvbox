@@ -69,41 +69,35 @@ module NetVbox
 
     def poweroff
       if showvminfo('VMState') == 'running'
-        my_ssh do |ssh|
-          ssh.exec!("VBoxManage controlvm \"#{@vm_info.vm_name}\" poweroff").strip
-        end
-      else
-        "#{@vm_info.vm_name} is not running"
+        my_ssh {|ssh| ssh.exec!("VBoxManage controlvm \"#{@vm_info.vm_name}\" poweroff").strip}
       end
     end
 
     def load_snapshot
-      return "ERROR: you must disable 3d acceleration for #{@vm_info.vm_name}" if showvminfo('accelerate3d') == 'on'
+      # VMs with 3D acceleration cannot be started remotely
+      # TODO: propogate this info to a log or some output to notify user
+      return if showvminfo('accelerate3d') == 'on'
       poweroff
-      my_ssh do |ssh|
-        ssh.exec!("VBoxManage snapshot \"#{@vm_info.vm_name}\" restore \"#{@vm_info.snapshot_name}\" && VBoxManage startvm \"#{@vm_info.vm_name}\" --type headless")
-      end
+      command = "VBoxManage snapshot \"#{@vm_info.vm_name}\" restore \"#{@vm_info.snapshot_name}\" && VBoxManage startvm \"#{@vm_info.vm_name}\" --type headless"
+      my_ssh {|ssh| ssh.exec!(command)}
     end
 
     private
 
     def showvminfo(var_name)
-      my_ssh do |ssh|
-        ssh.exec!("VBoxManage showvminfo \"#{@vm_info.vm_name}\" --machinereadable | grep ^#{var_name}= | cut -d '\"' -f 2").strip
-      end
+      command = "VBoxManage showvminfo \"#{@vm_info.vm_name}\" --machinereadable | grep ^#{var_name}= | cut -d '\"' -f 2"
+      my_ssh {|ssh| ssh.exec!(command).strip}
     end
 
     def my_ssh
       ssh_info = @vm_info.ssh_connection_info
       begin
         # can raise SocketError or Net::SSH::AuthenticationFailed
-        Net::SSH.start(ssh_info.hostname, ssh_info.username, :password => ssh_info.password) do |ssh|
-          return yield ssh
-        end
+        Net::SSH.start(ssh_info.hostname, ssh_info.username, :password => ssh_info.password) {|ssh| return yield ssh}
       rescue SocketError
-        return 'Connection Error'
+        return 'connection error'
       rescue Net::SSH::AuthenticationFailed
-        return 'Authentication Error'
+        return 'authentication error'
       end
     end
   end

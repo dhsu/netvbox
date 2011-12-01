@@ -33,7 +33,7 @@ module NetVbox
     end
 
     def current_set
-      VmSet.new(VmSetConfig.new("#{current_set_name()}.#{VM_SET_EXTENSION}"))
+      VmSet.new(VmSetConfig.new(vm_set_config_file(current_set_name)))
     end
 
     def use_default_set
@@ -45,18 +45,22 @@ module NetVbox
       if File.exists? vm_set_config_file(vm_set_name)
         IO.write("#{@netvbox_home}/#{CURRENT_VM_SET_FILENAME}", vm_set_name)
       else
-        use_default_set()
+        raise "VM set #{vm_set_name} does not exist"
       end
     end
 
     def create_set(vm_set_name)
-      raise "set: #{vm_set_name} already exists" if exists? vm_set_name
-      FileUtils.touch vm_set_config_file(vm_set_name)
+      raise "Set: #{vm_set_name} already exists" if exists? vm_set_name
+      begin
+        FileUtils.touch vm_set_config_file(vm_set_name)
+      rescue
+        raise "Cannot create set with name: #{vm_set_name}"
+      end
     end
 
     def remove_set(vm_set_name)
-      raise "set: #{vm_set_name} does not exist" unless exists? vm_set_name
-      raise "cannot remove default set" if vm_set_name == DEFAULT_VM_SET_NAME
+      raise "Set: #{vm_set_name} does not exist" unless exists? vm_set_name
+      raise "Cannot remove default set" if vm_set_name == DEFAULT_VM_SET_NAME
       use_default_set if current_set_name == vm_set_name
       File.delete vm_set_config_file(vm_set_name)
     end

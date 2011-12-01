@@ -2,38 +2,41 @@
 
 require 'netvbox/vm_set_config'
 require 'netvbox/vm_set_manager'
+require 'netvbox/printing_delegator'
 require 'netvbox/version'
 
 NETVBOX_HOME = "#{ENV['HOME']}/.netvbox"
 
 def print_help
-  puts "NetVbox version #{NetVbox::VERSION}"
+  puts "NetVbox #{NetVbox::VERSION}"
   puts "Config path: #{NETVBOX_HOME}"
-  puts 'sub-commands:'
-  puts '    add [ssh host] [username] [password] [vm name] [snapshot name]'
-  puts '        adds a vm to manage'
+  puts
+  puts 'SUB-COMMANDS'
+  puts '    add <ssh host> <username> <password> <vm name> <snapshot name>'
+  puts '        adds a vm snapshot on the specified host'
   puts '    list'
-  puts '        lists vms under management'
+  puts '        lists vm snapshots'
   puts '    load'
   puts '        loads vm snapshots'
   puts '    poweroff'
   puts '        powers off all vms'
-  puts '    remove [ssh host] [username] [vm name] [snapshot name]'
-  puts '        removes a vm from management'
+  puts '    remove <ssh host> <username> <vm name> <snapshot name>'
+  puts '        removes a vm snapshot from management'
   puts '    status'
   puts '         shows status of vms'
-  puts 'vm set sub-commands:'
-  puts '    createset [vm set]'
+  puts
+  puts 'VM SET SUB-COMMANDS'
+  puts '    createset <set name>'
   puts '         creates a vm set with the specified name'
   puts '    currentset'
   puts '         shows the current vm set in use'
   puts '    listsets'
   puts '         lists all vm sets'
-  puts '    removeset [vm set]'
+  puts '    removeset <set name>'
   puts '         removes the vm set with the specified name'
   puts '    usedefaultset'
   puts '         uses the default vm set'
-  puts '    useset'
+  puts '    useset <set name>'
   puts '         uses the vm set with the specified name'
 end
 
@@ -46,49 +49,49 @@ def expect_args(num_expected_args)
   end
 end
 
-def parse_args
+def process_args
   command = ARGV[0]
   vm_set_manager = NetVbox::VmSetManager.new(NETVBOX_HOME)
   vm_set = vm_set_manager.current_set
+  delegator = NetVbox::PrintingDelegator.new(vm_set_manager, vm_set)
   case command
   when 'add'
     expect_args(6) do
       hostname, username, password, vm_name, snapshot_name = ARGV[1..5]
-      vm_set.add_vm(hostname, username, password, vm_name, snapshot_name)
+      delegator.add_vm(hostname, username, password, vm_name, snapshot_name)
     end
   when 'list'
-    vm_set.list_vms
+    delegator.list_vms
   when 'load'
-    vm_set.load_snapshots
+    delegator.load_snapshots
   when 'poweroff'
-    vm_set.poweroff_all
+    delegator.poweroff_all
   when 'remove'
     expect_args(5) do
       hostname, username, vm_name, snapshot_name = ARGV[1..4]
-      vm_set.remove_vm(hostname, username, vm_name, snapshot_name)
+      delegator.remove_vm(hostname, username, vm_name, snapshot_name)
     end
   when 'status'
-    vm_set.print_status
+    delegator.print_status
   when 'createset'
-    expect_args(2) {vm_set_manager.create_set ARGV[1]}
+    expect_args(2) {delegator.create_set ARGV[1]}
   when 'currentset'
-    puts vm_set_manager.current_set_name
+    delegator.print_current_set
   when 'listsets'
-    vm_set_manager.vm_set_names.each {|vm_set_name| puts vm_set_name}
+    delegator.list_sets
   when 'removeset'
-    expect_args(2) {vm_set_manager.remove_set ARGV[1]}
+    expect_args(2) {delegator.remove_set ARGV[1]}
   when 'usedefaultset'
-    vm_set_manager.use_default_set
+    delegator.use_default_set
   when 'useset'
-    expect_args(2) {vm_set_manager.use_set ARGV[1]}
+    expect_args(2) {delegator.use_set ARGV[1]}
   else
-    puts "Unknown command: #{command}"
-    print_help
+    puts "Unknown command: #{command}. See help."
   end
 end
 
 if ARGV.empty?
   print_help
 else
-  parse_args
+  process_args
 end
