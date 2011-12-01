@@ -25,7 +25,7 @@ section.
 
 
 == Sub-commands
-netvbox uses sub-comamnds. Below is the help listing.
+netvbox uses sub-commands. Below is the help listing.
 
   SUB-COMMANDS
       add <ssh host> <username> <password> <vm name> <snapshot name>
