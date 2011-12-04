@@ -3,6 +3,7 @@
 require 'netvbox/vm_set_config'
 require 'netvbox/vm_set_manager'
 require 'netvbox/printing_delegator'
+require 'netvbox/wizard_delegator'
 require 'netvbox/version'
 
 NETVBOX_HOME = "#{ENV['HOME']}/.netvbox"
@@ -38,6 +39,9 @@ def print_help
   puts '         uses the default vm set'
   puts '    useset <set name>'
   puts '         uses the vm set with the specified name'
+  puts
+  puts '* Tip: You will be prompted for input if you leave out sub-command'
+  puts '       arguments (e.g. netvbox add)'
 end
 
 def expect_args(num_expected_args)
@@ -53,40 +57,50 @@ def process_args
   command = ARGV[0]
   vm_set_manager = NetVbox::VmSetManager.new(NETVBOX_HOME)
   vm_set = vm_set_manager.current_set
-  delegator = NetVbox::PrintingDelegator.new(vm_set_manager, vm_set)
-  case command
-  when 'add'
-    expect_args(6) do
-      hostname, username, password, vm_name, snapshot_name = ARGV[1..5]
-      delegator.add_vm(hostname, username, password, vm_name, snapshot_name)
+  printing_delegator = NetVbox::PrintingDelegator.new(vm_set_manager, vm_set)
+  wizard_delegator = NetVbox::WizardDelegator.new(printing_delegator)
+  begin
+    case command
+    when 'add'
+      return wizard_delegator.add_vm if ARGV.length == 1
+      expect_args(6) do
+        hostname, username, password, vm_name, snapshot_name = ARGV[1..5]
+        printing_delegator.add_vm(hostname, username, password, vm_name, snapshot_name)
+      end
+    when 'list'
+      printing_delegator.list_vms
+    when 'load'
+      printing_delegator.load_snapshots
+    when 'poweroff'
+      printing_delegator.poweroff_all
+    when 'remove'
+      return wizard_delegator.remove_vm if ARGV.length == 1
+      expect_args(5) do
+        hostname, username, vm_name, snapshot_name = ARGV[1..4]
+        printing_delegator.remove_vm(hostname, username, vm_name, snapshot_name)
+      end
+    when 'status'
+      printing_delegator.print_status
+    when 'createset'
+      return wizard_delegator.create_set if ARGV.length == 1
+      expect_args(2) {printing_delegator.create_set ARGV[1]}
+    when 'currentset'
+      printing_delegator.print_current_set
+    when 'listsets'
+      printing_delegator.list_sets
+    when 'removeset'
+      return wizard_delegator.remove_set if ARGV.length == 1
+      expect_args(2) {printing_delegator.remove_set ARGV[1]}
+    when 'usedefaultset'
+      printing_delegator.use_default_set
+    when 'useset'
+      return wizard_delegator.use_set if ARGV.length == 1
+      expect_args(2) {printing_delegator.use_set ARGV[1]}
+    else
+      puts "Unknown command: #{command}. See help."
     end
-  when 'list'
-    delegator.list_vms
-  when 'load'
-    delegator.load_snapshots
-  when 'poweroff'
-    delegator.poweroff_all
-  when 'remove'
-    expect_args(5) do
-      hostname, username, vm_name, snapshot_name = ARGV[1..4]
-      delegator.remove_vm(hostname, username, vm_name, snapshot_name)
-    end
-  when 'status'
-    delegator.print_status
-  when 'createset'
-    expect_args(2) {delegator.create_set ARGV[1]}
-  when 'currentset'
-    delegator.print_current_set
-  when 'listsets'
-    delegator.list_sets
-  when 'removeset'
-    expect_args(2) {delegator.remove_set ARGV[1]}
-  when 'usedefaultset'
-    delegator.use_default_set
-  when 'useset'
-    expect_args(2) {delegator.use_set ARGV[1]}
-  else
-    puts "Unknown command: #{command}. See help."
+  rescue Interrupt
+    puts
   end
 end
 
