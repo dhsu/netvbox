@@ -38,12 +38,12 @@ module NetVbox
       print_status
     end
 
-    def remove_vm(hostname, username, vm_name, snapshot_name)
+    def remove_vm(hostname, username, vm_name)
       begin
-        @vm_set.remove_vm(hostname, username, vm_name, snapshot_name)
-        puts "Removed (#{vm_name}, #{snapshot_name}) on host, #{hostname}"
+        @vm_set.remove_vm(hostname, username, vm_name)
+        puts "Removed #{vm_name} snapshot on host, #{hostname}"
       rescue => e
-        puts "Could not remove VM snapshot: #{e.message}"
+        puts "Could not remove #{vm_name} snapshot: #{e.message}"
       end
     end
 

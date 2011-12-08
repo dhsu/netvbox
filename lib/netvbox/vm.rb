@@ -12,13 +12,9 @@ module NetVbox
     end
 
     def ==(other)
-      self === other &&
-      self.password == other.password
-    end
-
-    def ===(other)
       self.hostname == other.hostname &&
-      self.username == other.username      
+      self.username == other.username &&
+      self.password == other.password
     end
   end
 
@@ -31,16 +27,20 @@ module NetVbox
       @snapshot_name = snapshot_name
     end
 
+    def clashes_with?(other)
+      clashes_with_params?(other.ssh_connection_info.hostname, other.ssh_connection_info.username, other.vm_name)
+    end
+
+    def clashes_with_params?(hostname, username, vm_name)
+      self.ssh_connection_info.hostname == hostname &&
+      self.ssh_connection_info.username == username &&
+      self.vm_name == vm_name
+    end
+
     def ==(other)
       self.ssh_connection_info == other.ssh_connection_info &&
       self.vm_name == other.vm_name &&
       self.snapshot_name == other.snapshot_name
-    end
-
-    def ===(other)
-      self.ssh_connection_info === other.ssh_connection_info &&
-      self.vm_name == other.vm_name &&
-      self.snapshot_name == other.snapshot_name      
     end
   end
 
@@ -98,6 +98,8 @@ module NetVbox
         return 'connection error'
       rescue Net::SSH::AuthenticationFailed
         return 'authentication error'
+      rescue => e
+        return e.message
       end
     end
   end

@@ -19,20 +19,20 @@ module NetVbox
 
     def add_vm(vm_info)
       all = all_vm_info
-      if all.index(vm_info).nil?
+      if all.detect {|i| i.clashes_with? vm_info}.nil?
         write_vm_info(all << vm_info)
       else
-        raise "(#{vm_info.vm_name}, #{vm_info.snapshot_name}) is already under management"
+        raise "The VM, #{vm_info.vm_name}, is already under management"
       end
     end
 
-    def remove_vm(vm_info)
+    def remove_vm(hostname, username, vm_name)
       all = all_vm_info
-      updated = all.select {|i| !(i === vm_info)}
+      updated = all.select {|i| !i.clashes_with_params?(hostname, username, vm_name)}
       if all != updated      
         write_vm_info(updated)
       else
-        raise "(#{vm_info.vm_name}, #{vm_info.snapshot_name}) is not under management"
+        raise "The VM, #{vm_name}, is not under management"
       end
     end
 

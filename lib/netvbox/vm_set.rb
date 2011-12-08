@@ -32,9 +32,8 @@ module NetVbox
       @vm_set_config.add_vm(vm_info)
     end
 
-    def remove_vm(hostname, username, vm_name, snapshot_name)
-      vm_info = VmInfo.new(SshConnectionInfo.new(hostname, username, nil), vm_name, snapshot_name)
-      @vm_set_config.remove_vm(vm_info)
+    def remove_vm(hostname, username, vm_name)
+      @vm_set_config.remove_vm(hostname, username, vm_name)
     end
 
     # return Hash of VmInfo to status

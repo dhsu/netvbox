@@ -20,8 +20,7 @@ module NetVbox
       hostname = get_value 'Enter hostname of VM host: '
       username = get_value 'Enter ssh username: '
       vm_name = get_value 'Enter VM name: '
-      snapshot_name = get_value 'Enter snapshot name: '
-      @printing_delegator.remove_vm(hostname, username, vm_name, snapshot_name)
+      @printing_delegator.remove_vm(hostname, username, vm_name)
     end
 
     def create_set

@@ -21,8 +21,8 @@ def print_help
   puts '        loads vm snapshots'
   puts '    poweroff'
   puts '        powers off all vms'
-  puts '    remove <ssh host> <username> <vm name> <snapshot name>'
-  puts '        removes a vm snapshot from management'
+  puts '    remove <ssh host> <username> <vm name>'
+  puts '        removes snapshot of specified vm from management'
   puts '    status'
   puts '         shows status of vms'
   puts
@@ -75,9 +75,9 @@ def process_args
       printing_delegator.poweroff_all
     when 'remove'
       return wizard_delegator.remove_vm if ARGV.length == 1
-      expect_args(5) do
-        hostname, username, vm_name, snapshot_name = ARGV[1..4]
-        printing_delegator.remove_vm(hostname, username, vm_name, snapshot_name)
+      expect_args(4) do
+        hostname, username, vm_name = ARGV[1..3]
+        printing_delegator.remove_vm(hostname, username, vm_name)
       end
     when 'status'
       printing_delegator.print_status
