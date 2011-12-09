@@ -26,6 +26,16 @@ module NetVbox
       puts 'No vms' if all_vm_info.empty?
     end
 
+    def list_vm_ips
+      puts 'Retrieving VM IP addresses for VMs with guest additions...'
+      all_ips = @vm_set.all_ips
+      all_ips.each do |vm_info, ip|
+        ip_string = (ip == :ip_unavailable) ? 'unavailable' : ip
+        printf "%-40s %s\n", "#{vm_info.vm_name} on #{vm_info.ssh_connection_info.hostname}", "[#{ip_string}]"
+      end
+      puts 'There are no vms' if all_ips.empty?
+    end
+
     def load_snapshots
       puts 'Loading snapshots...'
       @vm_set.load_snapshots

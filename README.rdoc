@@ -32,12 +32,14 @@ netvbox uses sub-commands. Below is the help listing.
           adds a vm snapshot on the specified host
       list
           lists vm snapshots
+      listips
+          lists ip addresses of vms with guest additions installed
       load
           loads vm snapshots
       poweroff
           powers off all vms
-      remove <ssh host> <username> <vm name> <snapshot name>
-          removes a vm snapshot from management
+      remove <ssh host> <username> <vm name>
+          removes snapshot of specified vm from management
       status
            shows status of vms
   
@@ -54,4 +56,11 @@ netvbox uses sub-commands. Below is the help listing.
            uses the default vm set
       useset <set name>
            uses the vm set with the specified name
+  
+  * Tip: You will be prompted for input if you leave out sub-command
+         arguments (e.g. netvbox add)
 
+
+== Changelog
+*0.0.6*
+- Breaking change: sub-command, remove, no longer requires snapshot name

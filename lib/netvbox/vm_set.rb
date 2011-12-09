@@ -47,6 +47,23 @@ module NetVbox
       status_map
     end
 
+    # return Hash of VmInfo to (vm ip or :ip_unavailable)
+    def all_ips
+      ip_map = {}
+      threads = []
+      get_vms.each do |vm|
+        threads << Thread.new(vm) do |vm|
+          begin
+            ip_map[vm.vm_info] = vm.vm_ip
+          rescue
+            ip_map[vm.vm_info] = :ip_unavailable
+          end
+        end
+      end
+      threads.each(&:join)
+      ip_map
+    end
+
     private
 
     def get_vms

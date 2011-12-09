@@ -79,7 +79,14 @@ module NetVbox
       return if showvminfo('accelerate3d') == 'on'
       poweroff
       command = "VBoxManage snapshot \"#{@vm_info.vm_name}\" restore \"#{@vm_info.snapshot_name}\" && VBoxManage startvm \"#{@vm_info.vm_name}\" --type headless"
-      my_ssh {|ssh| ssh.exec!(command)}
+      my_ssh {|ssh| ssh.exec! command}
+    end
+
+    def vm_ip
+      command = "VBoxManage guestproperty get \"#{@vm_info.vm_name}\" /VirtualBox/GuestInfo/Net/0/V4/IP"
+      out = my_ssh {|ssh| ssh.exec! command}
+      return out['Value:'.length..-1].strip unless (out =~ /^Value:/).nil?
+      raise "Cannot get IP for #{@vm_info.vm_name}: #{out}"
     end
 
     private

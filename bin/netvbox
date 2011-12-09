@@ -17,6 +17,8 @@ def print_help
   puts '        adds a vm snapshot on the specified host'
   puts '    list'
   puts '        lists vm snapshots'
+  puts '    listips'
+  puts '        lists ip addresses of vms with guest additions installed'
   puts '    load'
   puts '        loads vm snapshots'
   puts '    poweroff'
@@ -69,6 +71,8 @@ def process_args
       end
     when 'list'
       printing_delegator.list_vms
+    when 'listips'
+      printing_delegator.list_vm_ips
     when 'load'
       printing_delegator.load_snapshots
     when 'poweroff'
