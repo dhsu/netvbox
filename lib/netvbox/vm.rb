@@ -67,7 +67,7 @@ module NetVbox
       when 'aborted'
         'not running (aborted)'
       else
-        vm_state
+        vm_state.split("\n")[0]
       end
     end
 

@@ -66,7 +66,10 @@ netvbox uses sub-commands. Below is the help listing.
 
 
 == Changelog
+*0.0.7*
+- _Fix:_ fixed error printouts
+
 *0.0.6*
-- _Breaking change:_ sub-command, remove, no longer requires snapshot name.
+- _Breaking:_ sub-command, remove, no longer requires snapshot name.
 - _Feature:_ can now list the IP addresses of guest VMs with sub-command, listips.
 - _Feature:_ parallel ssh on hosts or guests. currently only supports ssh with password.
