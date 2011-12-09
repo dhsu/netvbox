@@ -23,6 +23,18 @@ module NetVbox
       @printing_delegator.remove_vm(hostname, username, vm_name)
     end
 
+    def ssh_hosts
+      command = get_value 'Enter command: '
+      @printing_delegator.ssh_hosts command
+    end
+
+    def ssh_guests
+      username = get_value 'Enter ssh username: '
+      pw = get_password 'Enter ssh password: '
+      command = get_value 'Enter command: '
+      @printing_delegator.ssh_guests(username, pw, command)
+    end
+
     def create_set
       set_name = get_value 'Enter set name: '
       @printing_delegator.create_set set_name

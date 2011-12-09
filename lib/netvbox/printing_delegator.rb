@@ -57,6 +57,22 @@ module NetVbox
       end
     end
 
+    def ssh_hosts(command)
+      all_output = @vm_set.ssh_hosts command
+      all_output.each do |vm_info, output|
+        output.split("\n").each {|line| puts "[#{vm_info.ssh_connection_info.hostname}] #{line}"}
+      end
+      puts 'There are no vms' if all_output.empty?
+    end
+
+    def ssh_guests(username, password, command)
+      all_output = @vm_set.ssh_guests(username, password, command)
+      all_output.each do |vm_info, output|
+        output.split("\n").each {|line| puts "[#{vm_info.vm_name} on #{vm_info.ssh_connection_info.hostname}] #{line}"}
+      end
+      puts 'There are no vms' if all_output.empty?
+    end
+
     def print_status
       puts 'Retrieving status info...'
       all_status = @vm_set.all_status

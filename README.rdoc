@@ -40,22 +40,26 @@ netvbox uses sub-commands. Below is the help listing.
           powers off all vms
       remove <ssh host> <username> <vm name>
           removes snapshot of specified vm from management
+      sshhosts <command>
+          runs the specified command on host computers
+      sshguests <ssh user> <ssh password> <command>
+          runs the specified command on guest vms
       status
-           shows status of vms
+          shows status of vms
   
   VM SET SUB-COMMANDS
       createset <set name>
-           creates a vm set with the specified name
+          creates a vm set with the specified name
       currentset
-           shows the current vm set in use
+          shows the current vm set in use
       listsets
-           lists all vm sets
+          lists all vm sets
       removeset <set name>
-           removes the vm set with the specified name
+          removes the vm set with the specified name
       usedefaultset
-           uses the default vm set
+          uses the default vm set
       useset <set name>
-           uses the vm set with the specified name
+          uses the vm set with the specified name
   
   * Tip: You will be prompted for input if you leave out sub-command
          arguments (e.g. netvbox add)
@@ -63,4 +67,6 @@ netvbox uses sub-commands. Below is the help listing.
 
 == Changelog
 *0.0.6*
-- Breaking change: sub-command, remove, no longer requires snapshot name
+- _Breaking change:_ sub-command, remove, no longer requires snapshot name.
+- _Feature:_ can now list the IP addresses of guest VMs with sub-command, listips.
+- _Feature:_ parallel ssh on hosts or guests. currently only supports ssh with password.

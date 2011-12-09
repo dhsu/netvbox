@@ -42,6 +42,10 @@ module NetVbox
       self.vm_name == other.vm_name &&
       self.snapshot_name == other.snapshot_name
     end
+
+    def to_s
+      "host: #{self.ssh_connection_info.hostname}, vm: #{vm_name}, snapshot: #{snapshot_name}"
+    end
   end
 
   class Vm
@@ -82,6 +86,20 @@ module NetVbox
       my_ssh {|ssh| ssh.exec! command}
     end
 
+    def ssh_host(command)
+      my_ssh {|ssh| ssh.exec! command} || ''
+    end
+
+    def ssh_guest(username, pw, command)
+      begin
+        hostname = vm_ip
+      rescue
+        return 'Guest VM IP unavailable'
+      end
+      ssh_info = SshConnectionInfo.new(hostname, username, pw)
+      my_ssh(ssh_info) {|ssh| ssh.exec! command} || ''
+    end
+
     def vm_ip
       command = "VBoxManage guestproperty get \"#{@vm_info.vm_name}\" /VirtualBox/GuestInfo/Net/0/V4/IP"
       out = my_ssh {|ssh| ssh.exec! command}
@@ -96,8 +114,7 @@ module NetVbox
       my_ssh {|ssh| ssh.exec!(command).strip}
     end
 
-    def my_ssh
-      ssh_info = @vm_info.ssh_connection_info
+    def my_ssh(ssh_info=@vm_info.ssh_connection_info)
       begin
         # can raise SocketError or Net::SSH::AuthenticationFailed
         Net::SSH.start(ssh_info.hostname, ssh_info.username, :password => ssh_info.password) {|ssh| return yield ssh}

@@ -25,30 +25,34 @@ def print_help
   puts '        powers off all vms'
   puts '    remove <ssh host> <username> <vm name>'
   puts '        removes snapshot of specified vm from management'
+  puts '    sshhosts <command>'
+  puts '        runs the specified command on host computers'
+  puts '    sshguests <ssh user> <ssh password> <command>'
+  puts '        runs the specified command on guest vms'
   puts '    status'
-  puts '         shows status of vms'
+  puts '        shows status of vms'
   puts
   puts 'VM SET SUB-COMMANDS'
   puts '    createset <set name>'
-  puts '         creates a vm set with the specified name'
+  puts '        creates a vm set with the specified name'
   puts '    currentset'
-  puts '         shows the current vm set in use'
+  puts '        shows the current vm set in use'
   puts '    listsets'
-  puts '         lists all vm sets'
+  puts '        lists all vm sets'
   puts '    removeset <set name>'
-  puts '         removes the vm set with the specified name'
+  puts '        removes the vm set with the specified name'
   puts '    usedefaultset'
-  puts '         uses the default vm set'
+  puts '        uses the default vm set'
   puts '    useset <set name>'
-  puts '         uses the vm set with the specified name'
+  puts '        uses the vm set with the specified name'
   puts
   puts '* Tip: You will be prompted for input if you leave out sub-command'
   puts '       arguments (e.g. netvbox add)'
 end
 
 def expect_args(num_expected_args)
-  if ARGV.length == num_expected_args
-    yield ARGV
+  if ARGV.length - 1 == num_expected_args
+    yield ARGV[1..-1]
   else
     puts 'Wrong number of arguments'
     print_help
@@ -57,6 +61,7 @@ end
 
 def process_args
   command = ARGV[0]
+  has_command_args = ARGV.length > 1
   vm_set_manager = NetVbox::VmSetManager.new(NETVBOX_HOME)
   vm_set = vm_set_manager.current_set
   printing_delegator = NetVbox::PrintingDelegator.new(vm_set_manager, vm_set)
@@ -64,9 +69,9 @@ def process_args
   begin
     case command
     when 'add'
-      return wizard_delegator.add_vm if ARGV.length == 1
-      expect_args(6) do
-        hostname, username, password, vm_name, snapshot_name = ARGV[1..5]
+      return wizard_delegator.add_vm unless has_command_args
+      expect_args(5) do |command_args|
+        hostname, username, password, vm_name, snapshot_name = command_args[0..4]
         printing_delegator.add_vm(hostname, username, password, vm_name, snapshot_name)
       end
     when 'list'
@@ -78,28 +83,37 @@ def process_args
     when 'poweroff'
       printing_delegator.poweroff_all
     when 'remove'
-      return wizard_delegator.remove_vm if ARGV.length == 1
-      expect_args(4) do
-        hostname, username, vm_name = ARGV[1..3]
+      return wizard_delegator.remove_vm unless has_command_args
+      expect_args(3) do |command_args|
+        hostname, username, vm_name = command_args[0..2]
         printing_delegator.remove_vm(hostname, username, vm_name)
+      end
+    when 'sshhosts'
+      return wizard_delegator.ssh_hosts unless has_command_args
+      expect_args(1) {|command_args| printing_delegator.ssh_hosts command_args[0]}
+    when 'sshguests'
+      return wizard_delegator.ssh_guests unless has_command_args
+      expect_args(3) do |command_args|
+        username, pw, command = command_args[0..2]
+        printing_delegator.ssh_guests(username, pw, command)
       end
     when 'status'
       printing_delegator.print_status
     when 'createset'
-      return wizard_delegator.create_set if ARGV.length == 1
-      expect_args(2) {printing_delegator.create_set ARGV[1]}
+      return wizard_delegator.create_set unless has_command_args
+      expect_args(1) {|command_args| printing_delegator.create_set command_args[0]}
     when 'currentset'
       printing_delegator.print_current_set
     when 'listsets'
       printing_delegator.list_sets
     when 'removeset'
-      return wizard_delegator.remove_set if ARGV.length == 1
-      expect_args(2) {printing_delegator.remove_set ARGV[1]}
+      return wizard_delegator.remove_set unless has_command_args
+      expect_args(1) {|command_args| printing_delegator.remove_set command_args[0]}
     when 'usedefaultset'
       printing_delegator.use_default_set
     when 'useset'
-      return wizard_delegator.use_set if ARGV.length == 1
-      expect_args(2) {printing_delegator.use_set ARGV[1]}
+      return wizard_delegator.use_set unless has_command_args
+      expect_args(1) {|command_args| printing_delegator.use_set command_args[0]}
     else
       puts "Unknown command: #{command}. See help."
     end

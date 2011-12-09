@@ -64,6 +64,28 @@ module NetVbox
       ip_map
     end
 
+    # return Hash of VmInfo to output of command
+    def ssh_hosts(command)
+      output_map = {}
+      threads = []
+      get_vms.each do |vm|
+        threads << Thread.new(vm) {|vm| output_map[vm.vm_info] = vm.ssh_host(command)}
+      end
+      threads.each(&:join)
+      output_map
+    end
+
+    # return Hash of VmInfo to output of command
+    def ssh_guests(username, pw, command)
+      output_map = {}
+      threads = []
+      get_vms.each do |vm|
+        threads << Thread.new(vm) {|vm| output_map[vm.vm_info] = vm.ssh_guest(username, pw, command)}
+      end
+      threads.each(&:join)
+      output_map
+    end
+
     private
 
     def get_vms
